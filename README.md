@@ -1,12 +1,36 @@
-# React + Vite
+#  El Reino
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React web application featuring a medieval kingdom theme. Built with React 19, Vite, and Bootstrap for a seamless and immersive royal experience.
 
-Currently, two official plugins are available:
+##   Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Medieval Kingdom Theme**: Complete royal aesthetic with custom fonts and color palette
+- **Responsive Design**: Bootstrap 5 integration for mobile-first development
+- **Modern React**: Built with React 19 and React Router DOM 7
+- **Fast Development**: Powered by Vite for lightning-fast hot module replacement
+- **User Authentication**: Secure login and registration system
+- **Interactive Components**: Smooth animations with Animate.css
+- **User Experience**: Enhanced with SweetAlert2 notifications
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Node.js (version 18 or higher)
+- npm or yarn package manager
+
+
+## 🛠️ Built With
+
+- [React 19](https://react.dev/) - UI library
+- [Vite](https://vitejs.dev/) - Build tool
+- [React Router DOM](https://reactrouter.com/) - Client-side routing
+- [Bootstrap 5](https://getbootstrap.com/) - CSS framework
+- [Animate.css](https://animate.style/) - CSS animations
+- [SweetAlert2](https://sweetalert2.github.io/) - Beautiful alerts
+
+## 📝 License
+
+KruDev.
+
+##  Contributing
+
+This is a private project. For questions or support, please contact the development team.
