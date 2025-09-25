@@ -27,6 +27,10 @@ A modern React web application featuring a medieval kingdom theme. Built with Re
 - [Animate.css](https://animate.style/) - CSS animations
 - [SweetAlert2](https://sweetalert2.github.io/) - Beautiful alerts
 
+## Visit here
+
+- [text](https://el-reino.netlify.app/)
+
 ## 📝 License
 
 KruDev.
