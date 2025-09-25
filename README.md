@@ -29,7 +29,7 @@ A modern React web application featuring a medieval kingdom theme. Built with Re
 
 ## Visit here
 
-- [El Reino](https://el-reino.netlify.app/)
+- [El Reino](https://el-reino-app.vercel.app/)
 
 ## 📝 License
 
