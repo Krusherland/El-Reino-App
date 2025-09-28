@@ -74,39 +74,66 @@ export const Account = () => {
 
   return (
     <div className="container kingdom-slide-up">
-      <h1>
-        <i className="fa-brands fa-fort-awesome-alt"></i> Registro del Noble en
-        el Reino
-      </h1>
-      {savedUser == "saved" ? (
-        <div className="alert alert-success" role="alert">
-          <strong>
-             ¡Tu registro en los libros del Reino ha sido actualizado con
-            éxito!
-          </strong>
-          <br />
-          <small>
-            Los escribas reales han documentado tus nuevos datos con tinta
-            dorada.
-          </small>
-        </div>
-      ) : (
-        ""
-      )}
+      <div className="row justify-content-center">
+        <div className="col-lg-10 col-xl-8">
+          <div className="card kingdom-card">
+            <div className="card-header text-center">
+              <h1 className="mb-0">
+                <i className="fa-brands fa-fort-awesome-alt"></i> Registro del Noble en el Reino
+              </h1>
+            </div>
+            <div className="card-body">
+              <div className="row">
+                {/* Kingdom Logo Side */}
+                <div className="col-md-4 d-flex align-items-center justify-content-center mb-4 mb-md-0">
+                  <div className="text-center kingdom-logo-section">
+                    <img 
+                      src="/src/assets/kingdom-logo2.png" 
+                      alt="Reino Logo" 
+                      className="img-fluid kingdom-logo mb-3"
+                      style={{
+                        maxWidth: "200px",
+                        height: "auto"
+                      }}
+                    />
+                    <p className="text-muted small">
+                       El Reino Eterno
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Form Side */}
+                <div className="col-md-8">
+                  {savedUser == "saved" ? (
+                    <div className="alert alert-success" role="alert">
+                      <strong>
+                         ¡Tu registro en los libros del Reino ha sido actualizado con
+                        éxito!
+                      </strong>
+                      <br />
+                      <small>
+                        Los escribas reales han documentado tus nuevos datos con tinta
+                        dorada.
+                      </small>
+                    </div>
+                  ) : (
+                    ""
+                  )}
 
-      {savedUser == "error" ? (
-        <div className="alert alert-danger" role="alert">
-          <strong>🛡️ Los pergaminos se han manchado...</strong>
-          <br />
-          <small>
-            Ha ocurrido un error al actualizar tu registro en los archivos del
-            Reino. Por favor, inténtalo de nuevo.
-          </small>
-        </div>
-      ) : (
-        ""
-      )}
-      <form className="account-form" onSubmit={updateUser} onReset={resetForm}>
+                  {savedUser == "error" ? (
+                    <div className="alert alert-danger" role="alert">
+                      <strong>🛡️ Los pergaminos se han manchado...</strong>
+                      <br />
+                      <small>
+                        Ha ocurrido un error al actualizar tu registro en los archivos del
+                        Reino. Por favor, inténtalo de nuevo.
+                      </small>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                  
+                  <form className="account-form" onSubmit={updateUser} onReset={resetForm}>
         <div className="mb-3">
           <label htmlFor="file" className="form-label">
             🎭 Retrato Real
@@ -288,15 +315,21 @@ export const Account = () => {
           />
         </div>
 
-        <div className="d-grid gap-2">
-          <button type="submit" className="btn btn-primary btn-lg">
-            ⚔️ Actualizar Registro Real
-          </button>
-          <button type="reset" className="btn btn-secondary">
-            🔄 Restaurar Pergamino Original
-          </button>
+                    <div className="d-grid gap-2">
+                      <button type="submit" className="btn btn-primary btn-lg">
+                        ⚔️ Actualizar Registro Real
+                      </button>
+                      <button type="reset" className="btn btn-secondary">
+                        🔄 Restaurar Pergamino Original
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

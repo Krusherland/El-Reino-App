@@ -9,6 +9,7 @@ import { Palace } from "../components/layout/private/Palace";
 import { Dungeons } from "../components/layout/private/Dungeons";
 import { Dungeon } from "../components/layout/private/Dungeon";
 import { Account } from "../components/layout/private/Account";
+import { UserList } from "../components/user/UserList";
 import { Error } from "../components/layout/public/Error";
 
 
@@ -27,6 +28,7 @@ export const Routing = () => {
             <Route path="palace" element={<Palace />} />
             <Route path="dungeons" element={<Dungeons />} />
             <Route path="dungeon" element={<Dungeon />} />
+            <Route path="users" element={<UserList />} />
             <Route path="account" element={<Account />} />
           </Route>
           <Route path="*" element={<Error />} />

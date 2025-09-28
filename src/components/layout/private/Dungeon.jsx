@@ -99,7 +99,7 @@ export const Dungeon = () => {
         <div className="col-lg-6 mb-4">
           <div className="card border-warning h-100">
             <div className="card-header bg-warning text-dark">
-              <h3 className="mb-0">🏰 {auth.dungeon || "Mi Fortaleza"}</h3>
+              <h3 className="mb-0"> {auth.dungeon || "Mi Fortaleza"}</h3>
             </div>
             <div className="card-body">
               <div className="text-center mb-3">

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const { formValues, handleChange} = useForm({});
-  const { setAuth } = useAuth();
+  const { setAuth, authedUser } = useAuth();
   const navigate = useNavigate();
   
   const loginUser = async (e) => {
@@ -22,7 +22,8 @@ export const Login = () => {
     if (data.status === "success") {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      setAuth(data.user);
+      // Refresh auth context with complete user data
+      await authedUser();
       navigate("/kingdom/palace");
     }
   };

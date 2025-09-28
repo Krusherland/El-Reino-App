@@ -41,8 +41,45 @@ export const Palace = () => {
               </p>
               
               <div className="row mt-4">
+                {/* Nobles Card */}
+                <div className="col-md-3 mb-3">
+                  <div 
+                    className="card h-100 kingdom-card-hover" 
+                    style={{cursor: 'pointer', transition: 'all 0.3s ease'}}
+                    onClick={() => navigate('/kingdom/users')}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(220, 53, 69, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                  >
+                    <div className="card-header bg-danger text-white text-center">
+                      <i className="fa-solid fa-users fa-2x mb-2"></i>
+                      <h5 className="mb-0"> Nobles del Reino</h5>
+                    </div>
+                    <div className="card-body text-center">
+                      <p className="card-text">
+                        Conoce a otros nobles, forja alianzas y expande tu red de contactos en el Reino.
+                      </p>
+                      <div className="mt-3">
+                        <span className="badge bg-danger">Social</span>
+                        <span className="badge bg-secondary ms-1">Networking</span>
+                      </div>
+                    </div>
+                    <div className="card-footer bg-light">
+                      <small className="text-muted">
+                        <i className="fa-solid fa-arrow-right me-1"></i>
+                        Descubre nobles
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Mazmorras Card */}
-                <div className="col-md-4 mb-3">
+                <div className="col-md-3 mb-3">
                   <div 
                     className="card h-100 kingdom-card-hover" 
                     style={{cursor: 'pointer', transition: 'all 0.3s ease'}}
@@ -79,7 +116,44 @@ export const Palace = () => {
                 </div>
 
                 {/* Calabozo Card */}
-                <div className="col-md-4 mb-3">
+                <div className="col-md-3 mb-3">
+                  <div 
+                    className="card h-100 kingdom-card-hover" 
+                    style={{cursor: 'pointer', transition: 'all 0.3s ease'}}
+                    onClick={() => navigate('/kingdom/dungeon')}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 193, 7, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                  >
+                    <div className="card-header bg-warning text-dark text-center">
+                      <i className="fa-solid fa-dungeon fa-2x mb-2"></i>
+                      <h5 className="mb-0"> Tu Calabozo</h5>
+                    </div>
+                    <div className="card-body text-center">
+                      <p className="card-text">
+                        Accede a tu fortaleza personal, donde puedes revisar tus logros y gestionar tus aventuras.
+                      </p>
+                      <div className="mt-3">
+                        <span className="badge bg-warning text-dark">Personal</span>
+                        <span className="badge bg-info ms-1">Estadísticas</span>
+                      </div>
+                    </div>
+                    <div className="card-footer bg-light">
+                      <small className="text-muted">
+                        <i className="fa-solid fa-arrow-right me-1"></i>
+                        Entra a tu refugio
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calabozo Card */}
+                <div className="col-md-3 mb-3">
                   <div 
                     className="card h-100 kingdom-card-hover" 
                     style={{cursor: 'pointer', transition: 'all 0.3s ease'}}
@@ -116,7 +190,7 @@ export const Palace = () => {
                 </div>
 
                 {/* Account Card */}
-                <div className="col-md-4 mb-3">
+                <div className="col-md-3 mb-3">
                   <div 
                     className="card h-100 kingdom-card-hover" 
                     style={{cursor: 'pointer', transition: 'all 0.3s ease'}}

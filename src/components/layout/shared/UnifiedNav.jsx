@@ -1,10 +1,10 @@
-import { NavLink, useNavigate } from "react-router-dom"
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import Swal from 'sweetalert2';
 
-export const Nav = () => {
-
-  const {auth, setAuth, setCounters} = useAuth();
+export const UnifiedNav = ({ isPrivate = false }) => {
+  const { auth, setAuth, setCounters } = useAuth();
   const navigate = useNavigate();
 
   const handleLogoutConfirmation = () => {
@@ -73,13 +73,14 @@ export const Nav = () => {
       }
     });
   };
+
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container-fluid">
-        <a className="navbar-brand" href="#">
+        <NavLink className="navbar-brand" to={isPrivate ? "/kingdom/palace" : "/"}>
           <i className="fa-brands fa-fort-awesome-alt"></i>
           El Reino
-        </a>
+        </NavLink>
         <button
           className="navbar-toggler"
           type="button"
@@ -93,30 +94,76 @@ export const Nav = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div className="navbar-nav">
-            <NavLink className="nav-link" to="/kingdom/palace">
-              <i className="fa-brands fa-fort-awesome"></i>
-              Palacio
-            </NavLink>
-            <NavLink className="nav-link" to="/kingdom/dungeons">
-              <i className="fa-solid fa-chess-rook"></i>
-              Mazmorras
-            </NavLink>
-            <NavLink className="nav-link" to="/kingdom/dungeon">
-              <i className="fa-solid fa-dungeon"></i>
-              Calabozo
-            </NavLink>
-            <NavLink className="nav-link" to="/kingdom/account">
-              <i className="fa-solid fa-person-shelter"></i>
-              {auth.name}
-            </NavLink>
-            <button 
-              className="nav-link btn btn-link" 
-              onClick={handleLogoutConfirmation}
-              style={{ border: 'none', background: 'none', textDecoration: 'none' }}
-            >
-              <i className="fa-solid fa-door-open"></i>
-              Salir
-            </button>
+            {isPrivate && auth?.name ? (
+              // Private navigation for authenticated users
+              <>
+                <NavLink className="nav-link" to="/kingdom/palace">
+                  <i className="fa-brands fa-fort-awesome"></i>
+                  Palacio
+                </NavLink>
+                <NavLink className="nav-link" to="/kingdom/dungeons">
+                  <i className="fa-solid fa-chess-rook"></i>
+                  Mazmorras
+                </NavLink>
+                <NavLink className="nav-link" to="/kingdom/dungeon">
+                  <i className="fa-solid fa-dungeon"></i>
+                  Calabozo
+                </NavLink>
+                <NavLink className="nav-link" to="/kingdom/users">
+                  <i className="fa-solid fa-users"></i>
+                  Nobles
+                </NavLink>
+                <NavLink className="nav-link" to="/kingdom/account">
+                  <i className="fa-solid fa-person-shelter"></i>
+                  {auth.name}
+                </NavLink>
+                <button 
+                  className="nav-link btn btn-link" 
+                  onClick={handleLogoutConfirmation}
+                  style={{ 
+                    border: 'none', 
+                    background: 'none', 
+                    textDecoration: 'none',
+                    color: 'var(--kingdom-light)',
+                    fontFamily: 'var(--font-heading)',
+                    fontWeight: '500',
+                    margin: '0 0.5rem',
+                    borderRadius: 'var(--border-radius-sm)',
+                    padding: '0.6rem 1rem',
+                    transition: 'var(--transition-normal)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'var(--gradient-primary)';
+                    e.target.style.color = 'white';
+                    e.target.style.textShadow = 'var(--text-shadow-sm)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = 'var(--shadow-sm)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'none';
+                    e.target.style.color = 'var(--kingdom-light)';
+                    e.target.style.textShadow = 'none';
+                    e.target.style.transform = 'none';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <i className="fa-solid fa-door-open"></i>
+                  Salir
+                </button>
+              </>
+            ) : (
+              // Public navigation for guests
+              <>
+                <NavLink className="nav-link" to="/login">
+                  <i className="fa-solid fa-torii-gate"></i>
+                  Entrar
+                </NavLink>
+                <NavLink className="nav-link" to="/register">
+                  <i className="fa-solid fa-feather"></i>
+                  Nombramiento
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       </div>
