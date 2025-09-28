@@ -36,6 +36,9 @@ export const AuthProvider = ({ children }) => {
       if (data.status === "success") {
         setAuth(data.user);
         
+        // Make user data globally available for services
+        window.authUser = data.user;
+        
         // Only fetch counters if user profile was successful
         try {
           const requestCounters = await fetch(Global.url + "user/counters/" + user.id, {
@@ -60,20 +63,32 @@ export const AuthProvider = ({ children }) => {
       } else {
         setAuth({});
         setCounters({});
+        window.authUser = null;
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
       setAuth({});
       setCounters({});
+      window.authUser = null;
     }
     
     setLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ auth, setAuth, authedUser, loading, counters, setCounters }}>
+    <AuthContext.Provider
+      value={{
+        auth,
+        setAuth,
+        counters,
+        setCounters,
+        loading,
+        authedUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
 export default AuthContext;

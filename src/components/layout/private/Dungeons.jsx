@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Global } from "../../../helpers/Global";
+import { ScrollsList } from "../../scrolls";
 
 export const Dungeons = () => {
   useEffect(() => {
@@ -77,6 +78,28 @@ export const Dungeons = () => {
                       <h5 className="card-title">Clasificaciones</h5>
                       <p className="card-text">Los más ilustres del Reino</p>
                       <span className="badge bg-danger">Próximamente</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrolls Section */}
+              <div className="row mt-4">
+                <div className="col-12">
+                  <div className="card border-warning">
+                    <div className="card-header bg-warning text-dark">
+                      <h5 className="mb-0">
+                        <i className="fa-solid fa-scroll me-2"></i>
+                        Pergaminos del Reino
+                      </h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="alert alert-warning" role="alert">
+                        <i className="fa-solid fa-info-circle me-2"></i>
+                        <strong>Mensajes de los Nobles:</strong> Aquí encontrarás los pergaminos 
+                        que otros aventureros han dejado durante sus travesías por el reino.
+                      </div>
+                      <ScrollsList maxScrolls={5} showHeader={false} />
                     </div>
                   </div>
                 </div>

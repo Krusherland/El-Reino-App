@@ -109,10 +109,7 @@ export const UnifiedNav = ({ isPrivate = false }) => {
                   <i className="fa-solid fa-dungeon"></i>
                   Calabozo
                 </NavLink>
-                <NavLink className="nav-link" to="/kingdom/users">
-                  <i className="fa-solid fa-users"></i>
-                  Nobles
-                </NavLink>
+
                 <NavLink className="nav-link" to="/kingdom/account">
                   <i className="fa-solid fa-person-shelter"></i>
                   {auth.name}

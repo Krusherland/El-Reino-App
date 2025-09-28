@@ -919,6 +919,204 @@ h4, .h4, h5, .h5, h6, .h6 {
   box-shadow: var(--shadow-md) !important;
 }
 
+/* ====== ENHANCED FORM COMPONENTS ====== */
+.kingdom-form-container {
+  position: relative;
+}
+
+.kingdom-form {
+  position: relative;
+}
+
+.kingdom-input-group {
+  position: relative;
+}
+
+.kingdom-label {
+  color: var(--kingdom-primary) !important;
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  text-shadow: var(--text-shadow-sm);
+  margin-bottom: 0.5rem;
+}
+
+.kingdom-label i {
+  margin-right: 8px;
+  color: var(--kingdom-accent);
+}
+
+.kingdom-help-text {
+  color: var(--kingdom-accent) !important;
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.kingdom-help-text i {
+  margin-right: 4px;
+}
+
+.kingdom-error-text {
+  color: var(--kingdom-danger) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.kingdom-error-text i {
+  margin-right: 4px;
+}
+
+/* Enhanced form controls */
+.kingdom-input-group .form-control {
+  transition: var(--transition-normal);
+  position: relative;
+}
+
+.kingdom-input-group .form-control:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3) !important;
+}
+
+.kingdom-input-group .form-control.is-invalid {
+  border-color: var(--kingdom-danger) !important;
+  box-shadow: 0 0 8px rgba(193, 41, 46, 0.3) !important;
+}
+
+/* Password toggle button */
+.kingdom-password-toggle {
+  border-color: var(--kingdom-accent) !important;
+  color: var(--kingdom-accent) !important;
+  transition: var(--transition-normal);
+}
+
+.kingdom-password-toggle:hover {
+  background: var(--kingdom-accent) !important;
+  color: white !important;
+  border-color: var(--kingdom-primary) !important;
+}
+
+/* Form action buttons */
+.kingdom-form-actions {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  margin-top: 1.5rem;
+}
+
+.kingdom-submit-btn {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  font-weight: 600;
+  text-shadow: var(--text-shadow-sm);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.kingdom-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--kingdom-accent), var(--kingdom-primary), #FFD700) !important;
+}
+
+.kingdom-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.kingdom-reset-btn {
+  border: 2px solid var(--kingdom-secondary) !important;
+  color: var(--kingdom-secondary) !important;
+  background: transparent !important;
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.kingdom-reset-btn:hover:not(:disabled) {
+  background: var(--kingdom-secondary) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kingdom-reset-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Select dropdown styling */
+.kingdom-input-group select.form-control {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23D4AF37' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+}
+
+/* Textarea specific styling */
+.kingdom-input-group textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Loading states */
+.kingdom-form .fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Form validation feedback */
+.kingdom-form .is-valid {
+  border-color: var(--kingdom-success) !important;
+  box-shadow: 0 0 8px rgba(82, 183, 136, 0.3) !important;
+}
+
+.kingdom-form .valid-feedback {
+  color: var(--kingdom-success) !important;
+  font-weight: 500;
+}
+
+/* Enhanced form animations */
+.kingdom-form-container.kingdom-fade-in {
+  animation: formSlideIn 0.6s ease-out;
+}
+
+@keyframes formSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive form improvements */
+@media (max-width: 768px) {
+  .kingdom-form-actions .row .col-md-6 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .kingdom-submit-btn,
+  .kingdom-reset-btn {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .kingdom-label {
+    font-size: 0.9rem;
+  }
+  
+  .kingdom-help-text,
+  .kingdom-error-text {
+    font-size: 0.8rem;
+  }
+}
+
 /* ====== MOBILE IMPROVEMENTS ====== */
 @media (max-width: 768px) {
   .kingdom-follow-btn,
