@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useApiError } from '../../hooks/useApiError';
-import { Global } from '../../helpers/Global';
+import { SocialService } from '../../services/SocialService';
 import { KingdomAlert } from '../common/KingdomComponents';
 import Swal from 'sweetalert2';
 
-export const Follow = ({ userId, isFollowing: initialFollowing = false }) => {
+export const Follow = ({ userId, isFollowing: initialFollowing = false, onFollowChange }) => {
   const { auth } = useAuth();
   const [isFollowing, setIsFollowing] = useState(initialFollowing);
   const { error, loading, handleApiCall, clearError } = useApiError();
   const [showError, setShowError] = useState(false);
   const token = localStorage.getItem('token');
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setIsFollowing(initialFollowing);
+  }, [initialFollowing, userId]);
 
   const handleFollow = async () => {
     if (!auth?._id || !token) {
@@ -31,37 +36,27 @@ export const Follow = ({ userId, isFollowing: initialFollowing = false }) => {
     setShowError(false);
     
     const action = isFollowing ? 'dejar de seguir' : 'seguir';
-    const endpoint = isFollowing ? 'unfollow' : 'follow';
     
     const result = await handleApiCall(async () => {
-      const request = await fetch(`${Global.url}follow/${endpoint}/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        }
-      });
-      
-      // Check if the response is HTML (404 error page) instead of JSON
-      const contentType = request.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('La funcionalidad de seguir nobles aún no está disponible en el servidor. Contacta al administrador del Reino.');
+      // Use the proper service layer instead of raw fetch
+      if (isFollowing) {
+        return await SocialService.unfollowUser(userId);
+      } else {
+        return await SocialService.followUser(userId);
       }
-      
-      const data = await request.json();
-      
-      if (data.status !== 'success') {
-        throw new Error(data.message || `Error al ${action} al noble`);
-      }
-      
-      return data;
     }, {
       errorMessage: `Error al ${action} al noble`,
       showLoading: false
     });
     
     if (result.success) {
-      setIsFollowing(!isFollowing);
+      const newFollowingState = !isFollowing;
+      setIsFollowing(newFollowingState);
+      
+      // Notify parent component of the change
+      if (onFollowChange) {
+        onFollowChange(userId, newFollowingState);
+      }
       
       // Show success notification
       const successMessage = isFollowing 

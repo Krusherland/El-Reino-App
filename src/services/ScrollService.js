@@ -40,6 +40,64 @@ export class ScrollService {
     }
   }
 
+  static async createScrollWithImage(scrollData, imageFile) {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication required');
+
+      // Business validation
+      this.validateScrollData(scrollData);
+      if (imageFile) {
+        this.validateImageFile(imageFile);
+      }
+
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('text', scrollData.content.trim());
+      if (imageFile) {
+        formData.append('file', imageFile);
+      }
+
+      console.log('Sending scroll with image to:', `${Global.url}scroll/upload`);
+      console.log('FormData contents:', {
+        text: scrollData.content.trim(),
+        file: imageFile ? imageFile.name : 'no file'
+      });
+
+      // Make API call to create scroll with image
+      const response = await fetch(`${Global.url}scroll/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token
+          // Note: Don't set Content-Type, browser will set it with boundary for FormData
+        },
+        body: formData
+      }).catch(err => {
+        console.error('Network error:', err);
+        throw new Error('No se pudo conectar con el servidor. Verifica que el servidor esté ejecutándose en http://localhost:3100');
+      });
+
+      console.log('Response status:', response.status);
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create scroll with image');
+      }
+
+      return {
+        status: 'success',
+        message: 'Scroll created successfully',
+        scroll: data.scroll
+      };
+    } catch (error) {
+      console.error('Error in createScrollWithImage:', error);
+      ErrorHandler.logError(error, 'CREATE_SCROLL_WITH_IMAGE');
+      throw error;
+    }
+  }
+
   static async getAllScrolls(page = 1, limit = 10) {
     try {
       const token = localStorage.getItem('token');
@@ -78,6 +136,7 @@ export class ScrollService {
         _id: scroll._id,
         title: scroll.text.substring(0, 50) + (scroll.text.length > 50 ? '...' : ''), // Create title from text
         content: scroll.text,
+        image: scroll.file || null,
         user: {
           _id: scroll.user._id,
           name: scroll.user.name,
@@ -142,6 +201,7 @@ export class ScrollService {
         _id: scroll._id,
         title: scroll.text.substring(0, 50) + (scroll.text.length > 50 ? '...' : ''), // Create title from text
         content: scroll.text,
+        image: scroll.file || null,
         user: {
           _id: scroll.user._id,
           name: scroll.user.name,
@@ -251,6 +311,7 @@ export class ScrollService {
         _id: scroll._id,
         title: scroll.text.substring(0, 50) + (scroll.text.length > 50 ? '...' : ''), // Create title from text
         content: scroll.text,
+        image: scroll.file || null,
         user: {
           _id: scroll.user._id,
           name: scroll.user.name,
@@ -284,6 +345,22 @@ export class ScrollService {
   static validateScrollId(scrollId) {
     if (!scrollId) {
       throw new Error('Scroll ID is required');
+    }
+  }
+
+  static validateImageFile(file) {
+    if (!file) return; // Image is optional
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Tipo de archivo no válido. Solo se permiten imágenes (JPG, PNG, GIF, WEBP)');
+    }
+
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      throw new Error('La imagen es demasiado grande. El tamaño máximo es 5MB');
     }
   }
 

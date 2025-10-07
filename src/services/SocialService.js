@@ -8,11 +8,11 @@ export class SocialService {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      // Business validation
-      this.validateUserId(userId);
-      this.validateNotSelfFollow(userId);
+      // Business validation - returns string version of userId
+      const validatedUserId = this.validateUserId(userId);
+      this.validateNotSelfFollow(validatedUserId);
 
-      const response = await fetch(`${Global.url}follow/follow/${userId}`, {
+      const response = await fetch(`${Global.url}follow/follow/${validatedUserId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,10 +38,10 @@ export class SocialService {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      // Business validation
-      this.validateUserId(userId);
+      // Business validation - returns string version of userId
+      const validatedUserId = this.validateUserId(userId);
 
-      const response = await fetch(`${Global.url}follow/unfollow/${userId}`, {
+      const response = await fetch(`${Global.url}follow/unfollow/${validatedUserId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,9 +117,11 @@ export class SocialService {
 
   // Business logic methods
   static validateUserId(userId) {
-    if (!userId || typeof userId !== 'string') {
+    if (!userId) {
       throw new Error('Valid user ID is required');
     }
+    // Convert to string if it's an ObjectId
+    return String(userId);
   }
 
   static validateNotSelfFollow(userId) {

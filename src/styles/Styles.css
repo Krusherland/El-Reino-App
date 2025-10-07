@@ -453,7 +453,6 @@ h4, .h4, h5, .h5, h6, .h6 {
 
 .kingdom-title::before,
 .kingdom-title::after {
-  content: '⚔️';
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -611,6 +610,26 @@ h4, .h4, h5, .h5, h6, .h6 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

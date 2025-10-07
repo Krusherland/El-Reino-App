@@ -7,6 +7,7 @@ import { KingdomForm } from "../../common/forms";
 import { KingdomAlert, KingdomCard, KingdomLoader } from "../../common/KingdomComponents";
 import { Follow } from "../../follow/Follow";
 import { Global } from "../../../helpers/Global";
+import Swal from 'sweetalert2';
 
 export const Dungeon = () => {
   const { auth, loading, counters } = useAuth();
@@ -19,11 +20,16 @@ export const Dungeon = () => {
   const [scrollSuccess, setScrollSuccess] = useState(null);
   const [showScrollForm, setShowScrollForm] = useState(false);
   
+  // Image upload state
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  
   // UserList functionality integrated into Dungeon
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState('');
   const [following, setFollowing] = useState([]);
+  const [followingLoading, setFollowingLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'scrolls', 'nobles'
   const token = localStorage.getItem('token');
   
@@ -47,18 +53,24 @@ export const Dungeon = () => {
     return null;
   }
 
-  // Load scrolls on component mount
+  // Load scrolls and following list on component mount
   useEffect(() => {
-    if (auth?._id) {
+    if (auth?._id && token) {
       loadUserScrolls();
+      // Load following list immediately on mount to ensure it's available
+      getFollowing();
     }
-  }, [auth]);
+  }, [auth?._id, token]); // Only re-run if auth ID or token changes
 
   // Load users when nobles tab is active
   useEffect(() => {
     if (activeTab === 'nobles') {
-      getUsers();
-      getFollowing();
+      // Always refresh following list when nobles tab is opened to ensure it's current
+      const loadData = async () => {
+        await getFollowing(); // Wait for following list first
+        await getUsers(); // Then load users
+      };
+      loadData();
     }
   }, [activeTab]);
 
@@ -94,6 +106,8 @@ export const Dungeon = () => {
     if (!auth?._id || !token) return;
     
     try {
+      setFollowingLoading(true);
+      // Remove the page parameter to get ALL follows
       const request = await fetch(`${Global.url}follow/following/${auth._id}`, {
         method: 'GET',
         headers: {
@@ -104,11 +118,37 @@ export const Dungeon = () => {
       
       const data = await request.json();
       
-      if (data.status === 'success') {
-        setFollowing(data.follows?.map(follow => follow.followed) || []);
+      if (data.status === 'success' && data.follows && Array.isArray(data.follows)) {
+        // Extract IDs - handle both populated objects and raw IDs
+        const followedIds = data.follows.map(follow => {
+          // If followed is an object (populated), get the _id, otherwise use it directly
+          const followedId = typeof follow.followed === 'object' && follow.followed !== null
+            ? follow.followed._id
+            : follow.followed;
+          return String(followedId); // Ensure string comparison
+        }).filter(id => id); // Remove any null/undefined entries
+        
+        setFollowing(followedIds);
+      } else {
+        setFollowing([]);
       }
     } catch (err) {
       console.error('Error loading following list:', err);
+      setFollowing([]);
+    } finally {
+      setFollowingLoading(false);
+    }
+  };
+
+  // Handle follow/unfollow changes
+  const handleFollowChange = (userId, isNowFollowing) => {
+    const userIdStr = String(userId); // Ensure string comparison
+    if (isNowFollowing) {
+      // Add to following list
+      setFollowing(prev => [...prev, userIdStr]);
+    } else {
+      // Remove from following list
+      setFollowing(prev => prev.filter(id => id !== userIdStr));
     }
   };
 
@@ -125,6 +165,27 @@ export const Dungeon = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('scrollImageInput');
+    if (fileInput) fileInput.value = '';
+  };
+
   const handleScrollSubmit = async (e) => {
     e.preventDefault();
     setScrollError(null);
@@ -132,9 +193,17 @@ export const Dungeon = () => {
 
     try {
       setScrollLoading(true);
-      await ScrollService.createScroll(formValues);
+      
+      // Use createScrollWithImage if there's an image, otherwise use createScroll
+      if (selectedImage) {
+        await ScrollService.createScrollWithImage(formValues, selectedImage);
+      } else {
+        await ScrollService.createScroll(formValues);
+      }
+      
       setScrollSuccess('¡Pergamino creado exitosamente!');
       resetForm();
+      handleRemoveImage(); // Clear image state
       setShowScrollForm(false);
       loadUserScrolls();
     } catch (err) {
@@ -145,20 +214,97 @@ export const Dungeon = () => {
   };
 
   const handleScrollDelete = async (scrollId) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este pergamino?')) {
-      return;
-    }
-
-    try {
-      setScrollLoading(true);
-      await ScrollService.deleteScroll(scrollId);
-      setScrollSuccess('Pergamino eliminado exitosamente.');
-      loadUserScrolls();
-    } catch (err) {
-      setScrollError(err.message);
-    } finally {
-      setScrollLoading(false);
-    }
+    Swal.fire({
+      title: '¿Destruir este pergamino real?',
+      html: `
+        <p style="font-size: 1rem; line-height: 1.6; color: #D4AF37;">
+          Esta acción es <strong>irreversible</strong> y el documento será consumido por las llamas del olvido, 
+          desapareciendo para siempre de los archivos reales.
+        </p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8B0000', // Dark red for danger
+      cancelButtonColor: '#6C757D',
+      confirmButtonText: '🔥 Destruir Pergamino',
+      cancelButtonText: '🛡️ Conservar',
+      reverseButtons: true,
+      background: '#2C1810',
+      color: '#D4AF37',
+      customClass: {
+        popup: 'kingdom-modal',
+        title: 'kingdom-title',
+        htmlContainer: 'kingdom-content',
+        confirmButton: 'kingdom-confirm-btn',
+        cancelButton: 'kingdom-cancel-btn'
+      },
+      backdrop: `
+        rgba(139, 69, 19, 0.7)
+        url("data:image/svg+xml,%3csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%23D4AF37' fill-opacity='0.1' fill-rule='nonzero'%3e%3cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e")
+        left top
+        repeat
+      `,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setScrollLoading(true);
+          await ScrollService.deleteScroll(scrollId);
+          
+          // Show success message
+          Swal.fire({
+            title: '¡Pergamino Destruido!',
+            html: `
+              <p style="font-size: 1rem; color: #52B788;">
+                El pergamino ha sido consumido por las llamas y removido de los archivos reales.
+              </p>
+            `,
+            icon: 'success',
+            timer: 2500,
+            showConfirmButton: false,
+            background: '#1B4332',
+            color: '#D4AF37',
+            iconColor: '#52B788',
+            customClass: {
+              popup: 'kingdom-success-modal',
+              title: 'kingdom-success-title'
+            },
+            showClass: {
+              popup: 'animate__animated animate__bounceIn'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOut'
+            }
+          });
+          
+          setScrollSuccess('Pergamino destruido exitosamente.');
+          loadUserScrolls();
+        } catch (err) {
+          setScrollError(err.message);
+          
+          // Show error message
+          Swal.fire({
+            title: 'Error en el Reino',
+            text: err.message,
+            icon: 'error',
+            confirmButtonColor: '#8B4513',
+            background: '#2C1810',
+            color: '#D4AF37',
+            customClass: {
+              popup: 'kingdom-modal',
+              confirmButton: 'kingdom-confirm-btn'
+            }
+          });
+        } finally {
+          setScrollLoading(false);
+        }
+      }
+    });
   };
 
   // Check if we have the essential data loaded
@@ -239,7 +385,7 @@ export const Dungeon = () => {
               <div className="row">
                 <div className="col-sm-6">
                   <div className="mb-3">
-                    <label className="form-label fw-bold">⚔️ Nombre de Guerra:</label>
+                    <label className="form-label fw-bold">Nombre de Guerra:</label>
                     <p className="text-muted">{auth.nickname || "Sin nombre de guerra"}</p>
                   </div>
                 </div>
@@ -416,6 +562,51 @@ export const Dungeon = () => {
                             {formValues.content?.length || 0}/500 caracteres
                           </div>
                         </div>
+
+                        <div className="mb-3">
+                          <label className="form-label">
+                            <i className="fa-solid fa-image me-2"></i>
+                            Imagen del Pergamino (Opcional)
+                          </label>
+                          <input
+                            id="scrollImageInput"
+                            type="file"
+                            className="form-control"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            onChange={handleImageChange}
+                            disabled={scrollLoading}
+                          />
+                          <div className="form-text">
+                            <i className="fa-solid fa-info-circle me-1"></i>
+                            Formatos permitidos: JPG, PNG, GIF, WEBP. Tamaño máximo: 5MB
+                          </div>
+                        </div>
+
+                        {imagePreview && (
+                          <div className="mb-3">
+                            <label className="form-label">
+                              <i className="fa-solid fa-eye me-2"></i>
+                              Vista Previa
+                            </label>
+                            <div className="position-relative d-inline-block">
+                              <img 
+                                src={imagePreview} 
+                                alt="Preview" 
+                                className="img-fluid rounded border"
+                                style={{ maxHeight: '200px', maxWidth: '100%' }}
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                onClick={handleRemoveImage}
+                                disabled={scrollLoading}
+                                title="Eliminar imagen"
+                              >
+                                <i className="fa-solid fa-times"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </KingdomForm>
                     </div>
                   </div>
@@ -464,6 +655,14 @@ export const Dungeon = () => {
                                   <i className="fa-solid fa-trash"></i>
                                 </button>
                               </div>
+                              {scroll.image && (
+                                <img 
+                                  src={`${Global.url}scroll/media/${scroll.image}`}
+                                  alt="Scroll image"
+                                  className="card-img-top"
+                                  style={{ maxHeight: '300px', objectFit: 'cover' }}
+                                />
+                              )}
                               <div className="card-body">
                                 <p className="card-text">{scroll.content}</p>
                                 <small className="text-muted">
@@ -493,11 +692,11 @@ export const Dungeon = () => {
         {activeTab === 'nobles' && (
           <div className="tab-pane fade show active">
             <div className="text-center mb-4">
-              <h2 className="kingdom-title">⚔️ Nobles del Reino ⚔️</h2>
+              <h2 className="kingdom-title"> Nobles del Reino </h2>
               <p className="kingdom-subtitle">Conoce a los habitantes de nuestro reino</p>
             </div>
 
-            {usersLoading ? (
+            {(usersLoading || followingLoading) ? (
               <KingdomLoader message="Buscando nobles en el reino..." size="large" />
             ) : usersError ? (
               <KingdomAlert 
@@ -515,72 +714,85 @@ export const Dungeon = () => {
               />
             ) : (
               <div className="row">
-                {users.map(user => (
-                  <div key={user._id} className="col-lg-4 col-md-6 mb-4">
-                    <KingdomCard 
-                      title={
-                        <>
-                          <i className="fa-solid fa-crown"></i>
-                          {user.name} {user.surname}
-                        </>
-                      }
-                      headerClass="text-center kingdom-gradient"
-                    >
-                      <div className="text-center">
-                        <div className="mb-3">
-                          {user.image && user.image !== 'default.png' ? (
-                            <img 
-                              src={`${Global.url}user/avatar/${user.image}`}
-                              alt={`Avatar de ${user.name}`}
-                              className="rounded-circle"
-                              style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                            />
-                          ) : (
-                            <div 
-                              className="rounded-circle d-flex align-items-center justify-content-center"
-                              style={{ 
-                                width: '80px', 
-                                height: '80px', 
-                                backgroundColor: 'var(--kingdom-primary, #007bff)',
-                                color: 'white',
-                                fontSize: '2rem',
-                                margin: '0 auto'
-                              }}
-                            >
-                              <i className="fa-solid fa-user"></i>
-                            </div>
-                          )}
-                        </div>
-                        
+                {users.map(user => {
+                  const userIdStr = String(user._id);
+                  const isUserFollowed = following.includes(userIdStr);
+                  
+                  return (
+                    <div key={user._id} className="col-lg-4 col-md-6 mb-4">
+                      <KingdomCard 
+                        title={
+                          <>
+                            <i className="fa-solid fa-crown"></i>
+                            {user.name} {user.surname}
+                          </>
+                        }
+                        headerClass="text-center kingdom-gradient"
+                      >
+                        <div className="text-center">
+                          <div className="mb-3">
+                            {user.image && user.image !== 'default.png' ? (
+                              <img 
+                                src={`${Global.url}user/avatar/${user.image}`}
+                                alt={`Avatar de ${user.name}`}
+                                className="rounded-circle"
+                                style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <div 
+                                className="rounded-circle d-flex align-items-center justify-content-center"
+                                style={{ 
+                                  width: '80px', 
+                                  height: '80px', 
+                                  backgroundColor: 'var(--kingdom-primary, #007bff)',
+                                  color: 'white',
+                                  fontSize: '2rem',
+                                  margin: '0 auto'
+                                }}
+                              >
+                                <i className="fa-solid fa-user"></i>
+                              </div>
+                            )}
+                          </div>
+                          
                         <h6 className="card-subtitle mb-2 text-muted">
                           <i className="fa-solid fa-at"></i> {user.nick}
                         </h6>
+                        
+                        {isUserFollowed && (
+                          <div className="mb-2">
+                            <span className="badge bg-success">
+                              <i className="fa-solid fa-check me-1"></i>
+                              Siguiendo
+                            </span>
+                          </div>
+                        )}
                         
                         {user.bio && (
                           <p className="card-text small">
                             <i className="fa-solid fa-scroll"></i> {user.bio}
                           </p>
-                        )}
-                        
-                        <div className="d-flex justify-content-between align-items-center mt-3">
-                          <button 
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={() => navigate(`/kingdom/profile/${user._id}`)}
-                            title="Ver perfil completo"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                            <span className="ms-1">Ver perfil</span>
-                          </button>
-                          
-                          <Follow 
-                            userId={user._id}
-                            isFollowing={following.includes(user._id)}
-                          />
+                        )}                          <div className="d-flex justify-content-between align-items-center mt-3">
+                            <button 
+                              className="btn btn-outline-primary btn-sm"
+                              onClick={() => navigate(`/kingdom/profile/${user._id}`)}
+                              title="Ver perfil completo"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                              <span className="ms-1">Ver perfil</span>
+                            </button>
+                            
+                            <Follow 
+                              userId={userIdStr}
+                              isFollowing={isUserFollowed}
+                              onFollowChange={handleFollowChange}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </KingdomCard>
-                  </div>
-                ))}
+                      </KingdomCard>
+                    </div>
+                  );
+                })}
               </div>
             )}
             

@@ -61,10 +61,26 @@ export const UserList = ({ page = 1, search = '' }) => {
       const data = await request.json();
       
       if (data.status === 'success') {
-        setFollowing(data.follows?.map(follow => follow.followed) || []);
+        // Extract IDs - handle both populated objects and raw IDs
+        const followedIds = data.follows?.map(follow => {
+          // If followed is an object (populated), get the _id, otherwise use it directly
+          return typeof follow.followed === 'object' ? follow.followed._id : follow.followed;
+        }) || [];
+        console.log('Following list loaded:', followedIds);
+        console.log('Total follows:', data.follows?.length);
+        console.log('Raw follows data:', data.follows);
+        setFollowing(followedIds);
       }
     } catch (err) {
       console.error('Error loading following list:', err);
+    }
+  };
+
+  const handleFollowChange = (userId, isNowFollowing) => {
+    if (isNowFollowing) {
+      setFollowing(prev => [...prev, userId]);
+    } else {
+      setFollowing(prev => prev.filter(id => id !== userId));
     }
   };
 
@@ -158,7 +174,15 @@ export const UserList = ({ page = 1, search = '' }) => {
                     
                     <Follow 
                       userId={user._id}
-                      isFollowing={following.includes(user._id)}
+                      isFollowing={(() => {
+                        const isFollowingUser = following.includes(user._id);
+                        console.log(`Checking if following user ${user._id} (${user.name}):`, isFollowingUser);
+                        console.log('Following array:', following);
+                        console.log('Type of user._id:', typeof user._id);
+                        console.log('Type of first following item:', typeof following[0]);
+                        return isFollowingUser;
+                      })()}
+                      onFollowChange={handleFollowChange}
                     />
                   </div>
                 </div>

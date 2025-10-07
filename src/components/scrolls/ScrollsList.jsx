@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollService } from '../../services/ScrollService';
 import { useAuth } from '../../hooks/useAuth';
+import { Global } from '../../helpers/Global';
 
 export const ScrollsList = ({ maxScrolls = 10, showHeader = true }) => {
   const { auth } = useAuth();
@@ -79,6 +80,19 @@ export const ScrollsList = ({ maxScrolls = 10, showHeader = true }) => {
         <div className="scrolls-container">
           {scrolls.map((scroll, index) => (
             <div key={scroll._id} className={`card mb-3 border-start border-warning border-3 ${index % 2 === 0 ? 'bg-light' : ''}`}>
+              {scroll.image && (
+                <img 
+                  src={`${Global.url}scroll/media/${scroll.image}`}
+                  alt="Scroll image"
+                  className="card-img-top"
+                  style={{ maxHeight: '400px', objectFit: 'cover', cursor: 'pointer' }}
+                  onClick={(e) => {
+                    // Open image in new tab on click
+                    window.open(e.target.src, '_blank');
+                  }}
+                  title="Click para ver en tamaño completo"
+                />
+              )}
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <h6 className="card-title mb-0 text-primary">

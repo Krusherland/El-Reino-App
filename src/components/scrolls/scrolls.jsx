@@ -4,6 +4,8 @@ import { useForm } from '../../hooks/useForm';
 import { ScrollService } from '../../services/ScrollService';
 import { KingdomForm, KingdomInput } from '../common/forms';
 import { KingdomAlert } from '../common/KingdomComponents';
+import { Global } from '../../helpers/Global';
+import Swal from 'sweetalert2';
 
 export const Scrolls = () => {
   const { auth } = useAuth();
@@ -12,6 +14,10 @@ export const Scrolls = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  
+  // Image upload state
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const { formValues, handleChange, resetForm } = useForm({
     content: ''
@@ -35,6 +41,27 @@ export const Scrolls = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('scrollImageInput');
+    if (fileInput) fileInput.value = '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -42,9 +69,17 @@ export const Scrolls = () => {
 
     try {
       setLoading(true);
-      await ScrollService.createScroll(formValues);
+      
+      // Use createScrollWithImage if there's an image, otherwise use createScroll
+      if (selectedImage) {
+        await ScrollService.createScrollWithImage(formValues, selectedImage);
+      } else {
+        await ScrollService.createScroll(formValues);
+      }
+      
       setSuccess('¡Pergamino creado exitosamente! Tu mensaje será visible en las mazmorras.');
       resetForm();
+      handleRemoveImage(); // Clear image state
       setShowForm(false);
       loadUserScrolls(); // Reload user scrolls
     } catch (err) {
@@ -55,20 +90,95 @@ export const Scrolls = () => {
   };
 
   const handleDelete = async (scrollId) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este pergamino?')) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await ScrollService.deleteScroll(scrollId);
-      setSuccess('Pergamino eliminado exitosamente.');
-      loadUserScrolls();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    Swal.fire({
+      title: '¿Destruir este pergamino real?',
+      html: `
+        <p style="font-size: 1rem; line-height: 1.6; color: #D4AF37;">
+          Esta acción es <strong>irreversible</strong> y el documento será consumido por las llamas del olvido, 
+          desapareciendo para siempre de los archivos reales.
+        </p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8B0000',
+      cancelButtonColor: '#6C757D',
+      confirmButtonText: '🔥 Destruir Pergamino',
+      cancelButtonText: '🛡️ Conservar',
+      reverseButtons: true,
+      background: '#2C1810',
+      color: '#D4AF37',
+      customClass: {
+        popup: 'kingdom-modal',
+        title: 'kingdom-title',
+        htmlContainer: 'kingdom-content',
+        confirmButton: 'kingdom-confirm-btn',
+        cancelButton: 'kingdom-cancel-btn'
+      },
+      backdrop: `
+        rgba(139, 69, 19, 0.7)
+        url("data:image/svg+xml,%3csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%23D4AF37' fill-opacity='0.1' fill-rule='nonzero'%3e%3cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e")
+        left top
+        repeat
+      `,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setLoading(true);
+          await ScrollService.deleteScroll(scrollId);
+          
+          Swal.fire({
+            title: '¡Pergamino Destruido!',
+            html: `
+              <p style="font-size: 1rem; color: #52B788;">
+                El pergamino ha sido consumido por las llamas y removido de los archivos reales.
+              </p>
+            `,
+            icon: 'success',
+            timer: 2500,
+            showConfirmButton: false,
+            background: '#1B4332',
+            color: '#D4AF37',
+            iconColor: '#52B788',
+            customClass: {
+              popup: 'kingdom-success-modal',
+              title: 'kingdom-success-title'
+            },
+            showClass: {
+              popup: 'animate__animated animate__bounceIn'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOut'
+            }
+          });
+          
+          setSuccess('Pergamino destruido exitosamente.');
+          loadUserScrolls();
+        } catch (err) {
+          setError(err.message);
+          
+          Swal.fire({
+            title: 'Error en el Reino',
+            text: err.message,
+            icon: 'error',
+            confirmButtonColor: '#8B4513',
+            background: '#2C1810',
+            color: '#D4AF37',
+            customClass: {
+              popup: 'kingdom-modal',
+              confirmButton: 'kingdom-confirm-btn'
+            }
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   if (!auth?.name) {
@@ -161,6 +271,51 @@ export const Scrolls = () => {
                               {formValues.content.length}/500 caracteres
                             </div>
                           </div>
+
+                          <div className="mb-3">
+                            <label className="form-label">
+                              <i className="fa-solid fa-image me-2"></i>
+                              Imagen del Pergamino (Opcional)
+                            </label>
+                            <input
+                              id="scrollImageInput"
+                              type="file"
+                              className="form-control"
+                              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                              onChange={handleImageChange}
+                              disabled={loading}
+                            />
+                            <div className="form-text">
+                              <i className="fa-solid fa-info-circle me-1"></i>
+                              Formatos permitidos: JPG, PNG, GIF, WEBP. Tamaño máximo: 5MB
+                            </div>
+                          </div>
+
+                          {imagePreview && (
+                            <div className="mb-3">
+                              <label className="form-label">
+                                <i className="fa-solid fa-eye me-2"></i>
+                                Vista Previa
+                              </label>
+                              <div className="position-relative d-inline-block">
+                                <img 
+                                  src={imagePreview} 
+                                  alt="Preview" 
+                                  className="img-fluid rounded border"
+                                  style={{ maxHeight: '200px', maxWidth: '100%' }}
+                                />
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                  onClick={handleRemoveImage}
+                                  disabled={loading}
+                                  title="Eliminar imagen"
+                                >
+                                  <i className="fa-solid fa-times"></i>
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </KingdomForm>
@@ -207,6 +362,14 @@ export const Scrolls = () => {
                                 <i className="fa-solid fa-trash"></i>
                               </button>
                             </div>
+                            {scroll.image && (
+                              <img 
+                                src={`${Global.url}scroll/media/${scroll.image}`}
+                                alt="Scroll image"
+                                className="card-img-top"
+                                style={{ maxHeight: '300px', objectFit: 'cover' }}
+                              />
+                            )}
                             <div className="card-body">
                               <p className="card-text">{scroll.content}</p>
                               <small className="text-muted">
